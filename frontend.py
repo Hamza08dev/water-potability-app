@@ -1,5 +1,9 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, jsonify, url_for 
+import pickle
+import numpy as np
+import pandas as pd 
 
+model = pickle.load(open('rfc.pkl', 'rb'))
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '78fabf5575579bcb76daea4131c8b06f8d41462b08850e3f'
 
@@ -10,6 +14,17 @@ def hello_world():
 @app.route("/about/")
 def about_page():
     return render_template("about.html")
+
+@app.route('/predict_api', methods=['POST'])
+def predict_api():
+    data = request.json['data']
+    print(data)
+    print(np.array(list(data.values())).reshape(1,-1))
+    new_data = print(np.array(list(data.values())).reshape(1,-1))
+    output = model.predict(new_data)
+    print(output[0])
+    return jsonify(output[0])
+
 
 @app.route("/result/", methods=['POST', 'GET'])
 def potability_calc():
@@ -30,7 +45,7 @@ def potability_calc():
     else:
         return redirect("/")
         
-        
+    
 
 
 if  __name__ == "__main__":
