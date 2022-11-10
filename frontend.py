@@ -15,16 +15,6 @@ def hello_world():
 def about_page():
     return render_template("about.html")
 
-@app.route('/predict_api', methods=['POST'])
-def predict_api():
-    data = request.json['data']
-    print(data)
-    print(np.array(list(data.values())).reshape(1,-1))
-    new_data = print(np.array(list(data.values())).reshape(1,-1))
-    output = model.predict(new_data)
-    print(output[0])
-    return jsonify(output[0])
-
 
 @app.route("/result/", methods=['POST', 'GET'])
 def potability_calc():
@@ -38,14 +28,20 @@ def potability_calc():
         oc = request.form["oc"]
         thm = request.form["trihalomethanes"]
         turb = request.form["turbidity"]
+        data = {"ph": ph, "hard": hard, "solid": solid, "chamine": chamine, "sulfate": sulfate, "cond": cond, "oc": oc, "thm": thm, "turb": turb}
+        new_data = np.array(list(data.values())).reshape(1,-1)
+        output = model.predict(new_data)
+        output = output[0]
+        if output == 1:
+            output = "Yes"
+        else:
+            output = "No"
         
-        context = {"ph": ph, "hard": hard, "solid": solid, "chamine": chamine, "sulfate": sulfate, "cond": cond, "oc": oc, "thm": thm, "turb": turb}
+        context = {"ph": ph, "hard": hard, "solid": solid, "chamine": chamine, "sulfate": sulfate, "cond": cond, "oc": oc, "thm": thm, "turb": turb, "potability": output}
 
         return render_template("results.html", context=context)
     else:
         return redirect("/")
-        
-    
 
 
 if  __name__ == "__main__":
